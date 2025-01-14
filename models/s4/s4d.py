@@ -68,7 +68,7 @@ class S4DKernel(nn.Module):
         A_Bar = torch.exp(dtA)
         B_bar = (torch.exp(dtA)-1.) / A #A^-1(exp(ΔA)-1)
 
-        x_k = torch.matmul(A_Bar, x_j) + torch.matmul(B_bar, u)
+        x_k = torch.matmul(A_Bar, x_j) + torch.matmul(B_bar, u) # Abar * x_k-1 + Bbar * u_k
         y = torch.matmul(C, x_k)
         return y, x_k
 
