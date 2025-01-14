@@ -124,7 +124,7 @@ class S4D(nn.Module):
         """ Input and output shape (B, H, L) """
         if not self.transposed: u = u.transpose(-1, -2)
         #L = u.size(-1)
-        y, x_k = self.kernel.calculatex(u, x_j)
+        y, x_k = self.kernel.calculatex(x_j, u)
         # Compute D term in state space equation - essentially a skip connection
         y = y + u * self.D.unsqueeze(-1)
         y = self.dropout(self.activation(y))
