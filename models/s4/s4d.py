@@ -41,7 +41,7 @@ class S4DKernel(nn.Module):
         # Vandermonde multiplication
         dtA = A * dt.unsqueeze(-1)  # (H N)
         K = dtA.unsqueeze(-1) * torch.arange(L, device=A.device) # (H N L)
-        C = C * (torch.exp(dtA)-1.) / A #C*ZOHのBバー/A
+        C = C * (torch.exp(dtA)-1.) / A #C * ZOHのBバー/A
         K = 2 * torch.einsum('hn, hnl -> hl', C, torch.exp(K)).real
 
         return K
@@ -65,10 +65,10 @@ class S4DKernel(nn.Module):
         A = -torch.exp(self.log_A_real) + 1j * self.A_imag # (H N)
 
         dtA = A * dt.unsqueeze(-1)  # (H N)
-        A_Bar = torch.exp(dtA)
+        A_bar = torch.exp(dtA)
         B_bar = (torch.exp(dtA)-1.) / A #A^-1(exp(ΔA)-1)
 
-        x_k = torch.matmul(A_Bar, x_j) + torch.matmul(B_bar, u) # Abar * x_k-1 + Bbar * u_k
+        x_k = torch.matmul(A_bar, x_j) + torch.matmul(B_bar, u) # Abar * x_k-1 + Bbar * u_k
         y = torch.matmul(C, x_k)
         return y, x_k
 
