@@ -58,7 +58,7 @@ class S4DKernel(nn.Module):
             if lr is not None: optim["lr"] = lr
             setattr(getattr(self, name), "_optim", optim)
 
-    def calculatex(self, x_j, u): #x_jはx_k-1のこと
+    def calculatex(self, u, x_j): #x_jはx_k-1のこと
         # Materialize parameters
         dt = torch.exp(self.log_dt) # (H)
         C = torch.view_as_complex(self.C) # (H N)
@@ -120,11 +120,11 @@ class S4D(nn.Module):
         if not self.transposed: y = y.transpose(-1, -2)
         return y, None # Return a dummy state to satisfy this repo's interface, but this can be modified
     
-    def generate(self, x_j, u): #x_jはx_k-1のこと
+    def generate(self, u, x_j): #x_jはx_k-1のこと
         """ Input and output shape (B, H, L) """
         if not self.transposed: u = u.transpose(-1, -2)
         #L = u.size(-1)
-        y, x_k = self.kernel.calculatex(x_j, u)
+        y, x_k = self.kernel.calculatex(u, x_j)
         # Compute D term in state space equation - essentially a skip connection
         y = y + u * self.D.unsqueeze(-1)
         y = self.dropout(self.activation(y))
