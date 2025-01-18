@@ -28,6 +28,7 @@ class S4DKernel(nn.Module):
         self.register("log_A_real", log_A_real, lr)
         self.register("A_imag", A_imag, lr)
 
+
     def forward(self, L):
         """
         returns: (..., c, L) where c is number of channels (default 1)
@@ -66,15 +67,18 @@ class S4DKernel(nn.Module):
 
         dtA = A * dt.unsqueeze(-1)  # (H N)
         A_bar = torch.exp(dtA)
-        B_bar = ((torch.exp(dtA)-1.) / A).sum() #A^-1(exp(ΔA)-1).sum()
+        B_bar = ((torch.exp(dtA)-1.) / A).sum().unsqueeze(-1) #A^-1(exp(ΔA)-1).sum()
 
-        #print("A_bar", A_bar.shape, A_bar.dtype)
-        #print("B_bar", B_bar.shape, B_bar.dtype)
+        print("A_bar", A_bar.shape, A_bar.dtype)
+        print("B_bar", B_bar)
 
         x_k = torch.sum(A_bar * x_j, dim=1) + torch.sum(B_bar * u) # Abar * x_k-1 + Bbar * u_k
-        #print("x_k", x_k.shape, x_k.dtype)
+        x_k = x_k.unsqueeze(-1)
+        print("C", C.shape, C.dtype)
+        print("x_k", x_k, x_k.shape, x_k.dtype)
         y = torch.sum(C * x_k)
-        return y, x_k
+        print("y", y)
+        return 2*y.real, x_k #s4 1201行目2y.real, 1611行目y.real
 
 
 class S4D(nn.Module):
