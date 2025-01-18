@@ -66,10 +66,14 @@ class S4DKernel(nn.Module):
 
         dtA = A * dt.unsqueeze(-1)  # (H N)
         A_bar = torch.exp(dtA)
-        B_bar = (torch.exp(dtA)-1.) / A #A^-1(exp(ΔA)-1)
+        B_bar = ((torch.exp(dtA)-1.) / A).sum() #A^-1(exp(ΔA)-1).sum()
 
-        x_k = torch.matmul(A_bar, x_j) + torch.matmul(B_bar, u) # Abar * x_k-1 + Bbar * u_k
-        y = torch.matmul(C, x_k)
+        #print("A_bar", A_bar.shape, A_bar.dtype)
+        #print("B_bar", B_bar.shape, B_bar.dtype)
+
+        x_k = torch.sum(A_bar * x_j, dim=1) + torch.sum(B_bar * u) # Abar * x_k-1 + Bbar * u_k
+        #print("x_k", x_k.shape, x_k.dtype)
+        y = torch.sum(C * x_k)
         return y, x_k
 
 
