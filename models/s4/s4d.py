@@ -67,18 +67,28 @@ class S4DKernel(nn.Module):
 
         dtA = A * dt.unsqueeze(-1)  # (H N)
         A_bar = torch.exp(dtA)
-        B_bar = ((torch.exp(dtA)-1.) / A).sum().unsqueeze(-1) #A^-1(exp(ΔA)-1).sum()
+        B_bar = ((torch.exp(dtA)-1.) / A) #A^-1(exp(ΔA)-1)
 
-        print("A_bar", A_bar.shape, A_bar.dtype)
-        print("B_bar", B_bar)
+        # print("A_bar", A_bar.shape)
+        # print("B_bar", B_bar.shape)
+        # print("x_j", x_j.shape)
 
-        x_k = torch.sum(A_bar * x_j, dim=1) + torch.sum(B_bar * u) # Abar * x_k-1 + Bbar * u_k
-        x_k = x_k.unsqueeze(-1)
-        print("C", C.shape, C.dtype)
-        print("x_k", x_k, x_k.shape, x_k.dtype)
-        y = torch.sum(C * x_k)
-        print("y", y)
-        return 2*y.real, x_k #s4 1201行目2y.real, 1611行目y.real
+        u = u.transpose(-1, -2)
+        u = u.reshape(*u.shape, 1)
+
+        # print("u", u.shape)
+
+        x_k = A_bar * x_j + B_bar * u # Abar * x_k-1 + Bbar * u_k
+
+        # print("C", C.shape)
+        # print("x_k", x_k.shape)
+
+        y = torch.sum(C * x_k, dim=-1)
+        y = y.transpose(-1, -2)
+
+        #print("y_calculatex", y.shape, y)
+
+        return y.real, x_k #s4 1201行目2y.real, 1611行目y.real
 
 
 class S4D(nn.Module):
@@ -137,5 +147,6 @@ class S4D(nn.Module):
         y = y + u * self.D.unsqueeze(-1)
         y = self.dropout(self.activation(y))
         y = self.output_linear(y)
-        if not self.transposed: y = y.transpose(-1, -2)
+        if not self.transposed: y = y.transpose(-1, -2) 
+        # print("y_output", y.shape)
         return y, x_k
